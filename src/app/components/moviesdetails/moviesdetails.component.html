@@ -1,0 +1,22 @@
+<section class="container mt-5">
+  <div *ngIf="movieDetails" class="card shadow-lg">
+    <div class="row g-0">
+      <div class="col-md-4">
+        <img [src]="movieDetails.poster" class="img-fluid rounded-start" alt="{{ movieDetails.title }}">
+      </div>
+      <div class="col-md-8">
+        <div class="card-body">
+          <h5 class="card-title">{{ movieDetails.title }} ({{ movieDetails.year }})</h5>
+          <p class="card-text"><strong>IMDb ID:</strong> {{ movieDetails.imdbID }}</p>
+          <p class="card-text"><strong>Type:</strong> {{ movieDetails.Type }}</p>
+          <p class="card-text" *ngIf="movieDetails?.Plot"><strong>Plot:</strong> {{ movieDetails.Plot }}</p>
+          <button routerLink="/dashboard" class="btn btn-secondary">Back to Dashboard</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div *ngIf="errorMessage" class="alert alert-danger">{{ errorMessage }}</div>
+  <div *ngIf="!movieDetails && !errorMessage">
+    <p>Loading movie details...</p>
+  </div>
+</section>

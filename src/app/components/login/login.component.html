@@ -1,0 +1,39 @@
+<section class="vh-100 d-flex align-items-center justify-content-center"
+  style="background: linear-gradient(to right, #141e30, #243b55);">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-md-6 col-lg-5">
+        <div class="card shadow-lg border-0 rounded-4">
+          <div class="card-body p-4 p-md-5">
+            <h2 class="text-center mb-4 text-primary fw-bold">🔐 Login to MoviesHub</h2>
+
+            <form (ngSubmit)="onLogin()" #loginForm="ngForm">
+              <div class="form-floating mb-3">
+                <input type="text" class="form-control" id="userName" name="userName" placeholder="user name" required
+                  ngModel [(ngModel)]="userName">
+                <label for="userName">User Name</label>
+              </div>
+
+              <div class="form-floating mb-4">
+                <input type="password" class="form-control" id="password" name="password" placeholder="Password"
+                  required ngModel [(ngModel)]="password">
+                <label for="password">Password</label>
+              </div>
+
+              <div *ngIf="loginError" class="alert alert-danger">{{ loginError }}</div>
+
+              <div class="d-grid">
+                <button class="btn btn-primary btn-lg shadow-sm" type="submit" [disabled]="!loginForm.valid">🎬
+                  Login</button>
+              </div>
+            </form>
+
+            <div class="mt-4 text-center">
+              <a href="#" class="text-decoration-none text-muted small">Forgot your password?</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

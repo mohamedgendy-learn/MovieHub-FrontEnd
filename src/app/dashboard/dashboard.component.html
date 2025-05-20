@@ -1,0 +1,221 @@
+<section class="container mt-5">
+  <div class="card shadow-sm">
+    <div class="card-body text-center">
+      <h1 *ngIf="authService.isAdmin()" class="text-primary">Admin Dashboard</h1>
+      <h1 *ngIf="authService.isUser()" class="text-success">User Dashboard</h1>
+      <p *ngIf="!authService.isLoggedIn()">Welcome to the Dashboard</p>
+
+      <button class="btn btn-danger mb-3" (click)="logout()">Logout</button>
+
+      <div *ngIf="authService.isUser()" class="mb-3">
+        <h3>Welcome, Movie Enthusiast!</h3>
+        <p>Browse or search for available movies below.</p>
+        <h2>Find a Movie</h2>
+        <div class="input-group mb-3">
+          <input
+            type="text"
+            class="form-control"
+            placeholder="Search by title"
+            [(ngModel)]="userSearchTerm"
+          />
+          <button class="btn btn-primary" type="button" (click)="searchDatabaseMoviesByUser()">
+            Search
+          </button>
+        </div>
+        <div *ngIf="userSearchResults && userSearchResults.length > 0">
+          <h3>Search Results</h3>
+          <table class="table table-striped">
+            <thead>
+              <tr>
+                <th>Poster</th>
+                <th>Title</th>
+                <th>Year</th>
+                <th>Details</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let movie of userSearchResults">
+                <td>
+                  <img
+                    *ngIf="movie.poster !== 'N/A'"
+                    [src]="movie.poster"
+                    alt="{{ movie.title }}"
+                    style="max-width: 50px;"
+                  />
+                </td>
+                <td>{{ movie.title }}</td>
+                <td>{{ movie.year }}</td>
+                <td>
+                  <a class="btn btn-info btn-sm" [routerLink]="['/movie', movie.imdbID]">View Details</a>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div *ngIf="userSearchErrorMessage" class="alert alert-danger">
+          {{ userSearchErrorMessage }}
+        </div>
+      </div>
+
+      <div *ngIf="authService.isAdmin()">
+        <h2>Admin Actions</h2>
+        <button
+          *ngIf="selectedMovieIds && selectedMovieIds.length > 0"
+          class="btn btn-primary mb-3"
+          (click)="addSelectedMoviesToDatabase()"
+        >
+          Add Selected Movies
+        </button>
+        <button class="btn btn-info mb-3" (click)="toggleView()">
+          {{ showingSearch ? 'Show Available Movies' : 'Show Movie Search' }}
+        </button>
+
+        <div *ngIf="showingSearch">
+          <h2>Search Movies</h2>
+          <div class="input-group mb-3">
+            <input
+              type="text"
+              class="form-control"
+              placeholder="Enter movie title"
+              [(ngModel)]="searchTerm"
+            />
+            <button class="btn btn-primary" type="button" (click)="searchMovies()">
+              Search
+            </button>
+          </div>
+
+          <div *ngIf="errorMessage" class="alert alert-danger">
+            {{ errorMessage }}
+          </div>
+
+          <div class="row row-cols-1 row-cols-md-3 g-4">
+            <div *ngFor="let movie of searchResults" class="col">
+              <div class="card h-100">
+                <img
+                  *ngIf="movie.Poster !== 'N/A'"
+                  [src]="movie.Poster"
+                  class="card-img-top"
+                  alt="{{ movie.Title }}"
+                />
+                <div class="card-body">
+                  <h5 class="card-title">{{ movie.Title }} ({{ movie.Year }})</h5>
+                  <p class="card-text">Type: {{ movie.Type }}</p>
+                  <div class="form-check">
+                    <input
+                      class="form-check-input"
+                      type="checkbox"
+                      [value]="movie.imdbID"
+                      (change)="onCheckboxChange($event, movie)"
+                      [checked]="isSelectedToAdd(movie.imdbID)"
+                    />
+                    <label class="form-check-label">Select to Add</label>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div *ngIf="!showingSearch">
+          <h2>Available Movies</h2>
+          <button
+            *ngIf="selectedToDelete && selectedToDelete.length > 0"
+            class="btn btn-danger mb-3"
+            (click)="deleteSelectedMovies()"
+          >
+            Delete Selected
+          </button>
+          <div *ngIf="databaseMovies.length > 0">
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>Select</th>
+                  <th>Poster</th>
+                  <th>Title</th>
+                  <th>Year</th>
+                  <th>Details</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let movie of databaseMovies">
+                  <td>
+                    <div class="form-check">
+                      <input
+                        class="form-check-input"
+                        type="checkbox"
+                        [value]="movie.imdbID"
+                        (change)="onCheckboxChange($event, movie, true)"
+                        [checked]="isSelectedToDelete(movie.imdbID)"
+                      />
+                    </div>
+                  </td>
+                  <td>
+                    <img
+                      *ngIf="movie.poster !== 'N/A'"
+                      [src]="movie.poster"
+                      alt="{{ movie.title }}"
+                      style="max-width: 50px;"
+                    />
+                  </td>
+                  <td>{{ movie.title }}</td>
+                  <td>{{ movie.year }}</td>
+                  <td>
+                    <a class="btn btn-info btn-sm" [routerLink]="['/movie', movie.imdbID]">View Details</a>
+                  </td>
+                  <td>
+                    <button
+                      class="btn btn-danger btn-sm"
+                      (click)="removeFromDatabase(movie.imdbID)"
+                    >
+                      Remove
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div *ngIf="databaseMovies && databaseMovies.length === 0">
+            <p>No movies available in the database yet.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="mb-3" *ngIf="!authService.isAdmin()">
+        <h2>Available Movies</h2>
+        <div *ngIf="databaseMovies.length > 0">
+          <table class="table table-striped">
+            <thead>
+              <tr>
+                <th>Poster</th>
+                <th>Title</th>
+                <th>Year</th>
+                <th>Details</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let movie of databaseMovies">
+                <td>
+                  <img
+                    *ngIf="movie.poster !== 'N/A'"
+                    [src]="movie.poster"
+                    alt="{{ movie.title }}"
+                    style="max-width: 50px;"
+                  />
+                </td>
+                <td>{{ movie.title }}</td>
+                <td>{{ movie.year }}</td>
+                <td>
+                  <a class="btn btn-info btn-sm" [routerLink]="['/movie', movie.imdbID]">View Details</a>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div *ngIf="databaseMovies && databaseMovies.length === 0">
+          <p>No movies available in the database yet.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
